@@ -35,7 +35,7 @@ except Exception as e:
 COLOR_RANGES = {
     "red":    [([0, 150, 80], [6, 255, 255]), ([170, 150, 80], [180, 255, 255])],
     "green":  [([35, 60, 50],   [85, 255, 255])],
-    "blue":   [([100, 50, 50],  [130, 255, 255])],
+    "blue":   [([97, 45, 45],  [132, 255, 255])],
     "purple": [([140, 50, 100], [170, 255, 255])],
     "yellow": [([18, 120, 120], [32, 255, 255])],
 }
@@ -82,6 +82,8 @@ COLOR_SHAPE = {
 # bar throws the real object away. Green stays a touch stricter (desk/wall).
 MIN_CIRC = {"green": 0.45, "red": 0.25, "yellow": 0.25, "purple": 0.25, "blue": 0.25}
 BLUE_BALL_CIRC = 0.77       # blue: circularity at/above this = ball, below = cube
+# Reject ragged background blobs: real objects are solid/compact (~0.9+).
+MIN_SOLIDITY = 0.85
 
 VALID_COLORS = ["red", "green", "blue", "yellow", "purple"]
 VALID_SHAPES = ["ball", "cube"]
@@ -89,7 +91,7 @@ VALID_OBJECTS = set(ACTIONS.keys())
 # Scan area: from SCAN_TOP down to the bottom, full width — so an object on the
 # table (off-centre or far) is still inside the search region.
 SCAN_TOP = 0.20
-MIN_AREA = 1500             # was 7000 — that was huge and killed far objects
+MIN_AREA = 800             # was 1500 — lowered so far-away objects still pass
 MAX_AREA = 250000
 
 # Path to a bark sound for the red ball (optional). Put a wav next to this file.
@@ -125,7 +127,17 @@ def detect_once(frame):
             perimeter = cv2.arcLength(cnt, True)
             circularity = 4 * np.pi * area / (perimeter * perimeter) if perimeter > 0 else 0
             if circularity < MIN_CIRC.get(color_name, 0.30):
-                continue  # reject background noise
+                continue  # reject stringy background noise
+
+            # Solidity = how filled-in the blob is (area / convex hull area).
+            # A real ball/cube is a solid, compact shape (~0.9+). Background
+            # false-positives are ragged and spread out (low solidity). This
+            # is what stops the camera calling an empty table a "blue cube".
+            hull = cv2.convexHull(cnt)
+            hull_area = cv2.contourArea(hull)
+            solidity = area / hull_area if hull_area > 0 else 0
+            if solidity < MIN_SOLIDITY:
+                continue
 
             fixed_shape = COLOR_SHAPE[color_name]
             if fixed_shape is None:  # blue → decide ball vs cube by roundness
