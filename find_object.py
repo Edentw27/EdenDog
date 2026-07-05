@@ -19,7 +19,7 @@ ACTIONS = {
 VALID_OBJECTS = set(ACTIONS.keys())
 
 SCAN_TOP = 0.25
-MIN_AREA = 2500
+MIN_AREA = 2000
 MAX_AREA = 250000
 MIN_CIRC = {"green": 0.45, "red": 0.25, "yellow": 0.25, "purple": 0.25, "blue": 0.25}
 CENTRE_BAND = 0.15
@@ -71,6 +71,8 @@ def find_target(frame, target):
 def main():
     print("Floor object finder. Put objects on the floor in view. Ctrl+C to quit.\n")
     cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_AUTO_WB, 0)
+    cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
     last = time.time()
     try:
         while True:

@@ -14,8 +14,8 @@ VALID_COLORS = ["red","green","blue","yellow","purple"]; VALID_SHAPES = ["ball",
 
 # ---- TUNE ----
 FWD_BURST=1.4; TURN_BURST=0.8; FWD_SPEED=15
-KP_TURN=45; MAX_TURN=45; MIN_TURN=25; TURN_SIGN=-1
-SEARCH_TURN=30; CENTRE_BAND=0.30; GRAB_AREA=6000
+KP_TURN=30; MAX_TURN=25; MIN_TURN=18; TURN_SIGN=-1
+SEARCH_TURN=30; CENTRE_BAND=0.40; GRAB_AREA=8000
 LOST_LIMIT=12; CAM_FAIL_LIMIT=15; SEARCH_LIMIT=30; SETTLE=0.35
 
 ARM_REST=(90,120); ARM_DOWN=(120,-80); CLAW_OPEN=0; CLAW_CLOSE=255; GRAB_NUDGE=8
@@ -82,6 +82,8 @@ def do_action(a):
 def fetch(target):
     log(f"=== FETCH {target} ({ACTIONS.get(target,'?')}) ===")
     cap=cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_AUTO_WB, 0)
+    cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
     state="SEARCH"; lost=0; camfail=0; searches=0; last_cx=0.0
     try:
         while True:
