@@ -19,7 +19,7 @@ ACTIONS = {
 VALID_OBJECTS = set(ACTIONS.keys())
 
 SCAN_TOP = 0.25
-MIN_AREA = 1500
+MIN_AREA = 2500
 MAX_AREA = 250000
 MIN_CIRC = {"green": 0.45, "red": 0.25, "yellow": 0.25, "purple": 0.25, "blue": 0.25}
 CENTRE_BAND = 0.15
